@@ -1,0 +1,16 @@
+# MiniMO
+
+file(GLOB includefiles
+"include/*.hpp"
+)
+
+file(GLOB sourcefiles
+"source/*.cpp"
+)
+
+add_library(game
+        ${includefiles}
+        ${sourcefiles}
+)
+target_include_directories(game PUBLIC "include/")
+include_directories("include/")

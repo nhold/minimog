@@ -1,0 +1,47 @@
+# MiniMO
+
+file(GLOB includefiles
+"include/*.hpp"
+)
+
+file(GLOB sourcefiles
+"source/*.cpp"
+)
+
+add_executable(client
+        ${includefiles}
+        ${sourcefiles}
+)
+
+target_link_libraries(client debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/enet.lib")
+target_link_libraries(client optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/enet.lib")
+
+if(WIN32)
+  target_link_libraries(client wsock32 ws2_32 winmm)
+endif()
+
+target_link_libraries(client  
+debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-main-d.lib"
+debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-window-d.lib"
+debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-system-d.lib"
+debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-graphics-d.lib"
+debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-audio-d.lib"
+debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-network-d.lib"
+${OPENGL_LIBRARIES})
+
+target_link_libraries(client 
+optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-main.lib"
+optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-window.lib"
+optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-system.lib"
+optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-graphics.lib"
+optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-audio.lib"
+optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-network.lib")
+
+include_directories("${CMAKE_SOURCE_DIR}/thirdparty/include/"
+"${CMAKE_SOURCE_DIR}/shared/include/"
+                    "include/")
+
+set (assetDir "${CMAKE_SOURCE_DIR}/assets")
+set (assetDestination "${CMAKE_CURRENT_BINARY_DIR}")
+
+file(COPY "${assetDir}" DESTINATION "${assetDestination}")

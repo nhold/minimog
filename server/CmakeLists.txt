@@ -1,0 +1,33 @@
+# MiniMO
+
+file(GLOB includefiles
+"include/*.hpp"
+"${CMAKE_SOURCE_DIR}/shared/include/*.hpp"
+)
+
+file(GLOB sourcefiles
+"source/*.cpp"
+)
+
+add_executable(server
+        ${includefiles}
+        ${sourcefiles}
+)
+
+target_link_libraries(server game)
+target_link_libraries(server debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/enet.lib")
+target_link_libraries(server optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/enet.lib")
+
+if(WIN32)
+  target_link_libraries(server wsock32 ws2_32 winmm)
+endif()
+
+include_directories("${CMAKE_SOURCE_DIR}/thirdparty/include/"
+"${CMAKE_SOURCE_DIR}/shared/include/"
+                    "include/")
+                    
+
+set (assetDir "${CMAKE_SOURCE_DIR}/assets")
+set (assetDestination "${CMAKE_CURRENT_BINARY_DIR}")
+
+file(COPY "${assetDir}" DESTINATION "${assetDestination}")

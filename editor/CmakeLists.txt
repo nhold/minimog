@@ -1,0 +1,46 @@
+# MiniMO
+
+file(GLOB includefiles
+"include/*.hpp"
+"${CMAKE_SOURCE_DIR}/shared/include/*.hpp"
+)
+
+file(GLOB sourcefiles
+"source/*.cpp"
+"${CMAKE_SOURCE_DIR}/thirdparty/imgui/*.cpp"
+)
+
+add_executable(editor
+        ${includefiles}
+        ${sourcefiles}
+)
+
+find_package(OpenGL REQUIRED)
+
+include_directories("${CMAKE_SOURCE_DIR}/thirdparty/include/"
+                "${CMAKE_SOURCE_DIR}/shared/include/"
+                "${CMAKE_SOURCE_DIR}/thirdparty/imgui/"
+                "include/")
+
+target_link_libraries(editor  
+debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-main-d.lib"
+debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-window-d.lib"
+debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-system-d.lib"
+debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-graphics-d.lib"
+debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-audio-d.lib"
+debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-network-d.lib"
+${OPENGL_LIBRARIES})
+
+target_link_libraries(editor 
+optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-main.lib"
+optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-window.lib"
+optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-system.lib"
+optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-graphics.lib"
+optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-audio.lib"
+optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-network.lib")
+
+
+set (assetDir "${CMAKE_SOURCE_DIR}/assets")
+set (assetDestination "${CMAKE_CURRENT_BINARY_DIR}")
+
+file(COPY "${assetDir}" DESTINATION "${assetDestination}")
