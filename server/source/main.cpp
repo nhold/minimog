@@ -8,21 +8,35 @@ int main()
 	NetworkServer networkServer;
 	networkServer.Initialise();
 
-	using clock = std::chrono::high_resolution_clock;
-	using ms = std::chrono::milliseconds;
+	using clock = std::chrono::steady_clock;
+	using tickRate = std::chrono::duration<clock::rep, std::ratio<1, 60>>;
+	using networkUpdateRate = std::chrono::duration<clock::rep, std::ratio<10, 60>>;
 
+	auto nextTick = clock::now() + tickRate{ 1 };
+	auto nextNetworkUpdate = clock::now() + networkUpdateRate{ 1 };
+
+	EpicZStage1 stage;
+	stage.Initialise();
 	while (networkServer.isRunning)
 	{
-		auto time_start = clock::now();
-
 		networkServer.ReceiveInputs();
-		Simulate(0, MAX_ENTITY_COUNT);
-		networkServer.SendGameState();
 
-		auto loop_time = clock::now() - time_start;
-		while (loop_time < ms(16))
+		auto now = clock::now();
+
+		if (now >= nextTick)
 		{
-			loop_time = clock::now() - time_start;
+			auto diff = nextTick - now;
+			stage.Process();
+			Simulate(0, MAX_ENTITY_COUNT);
+			nextTick += tickRate{ 1 } + diff;
+		}
+
+		now = clock::now();
+		if (now >= nextNetworkUpdate)
+		{
+			auto diff = nextTick - now;
+			networkServer.SendGameState();
+			nextNetworkUpdate += networkUpdateRate{ 1 } + diff;
 		}
 	}
 

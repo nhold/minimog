@@ -4,6 +4,7 @@
 #include <game.hpp>
 #include <networkclient.hpp>
 #include <tilemap.hpp>
+#include <chrono>
 
 int main()
 {
@@ -55,9 +56,13 @@ int main()
 
 
 	bool hasFocus = true;
+
+	using clock = std::chrono::high_resolution_clock;
+	using ms = std::chrono::milliseconds;
+
 	while (window.isOpen())
 	{
-		
+		auto time_start = clock::now();
 		sf::Event windowEvent;
 		while (window.pollEvent(windowEvent)) 
 		{
@@ -117,6 +122,7 @@ int main()
 			}
 
 			client.SendInput(playerFrame);
+			//ProcessInput(0);
 		}
 
 		window.setView(view);
@@ -144,6 +150,12 @@ int main()
 		}
 
 		window.display();
+
+		auto loop_time = clock::now() - time_start;
+		while (loop_time < ms(16))
+		{
+			loop_time = clock::now() - time_start;
+		}
 	}
 
 	client.Shutdown();

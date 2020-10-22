@@ -11,6 +11,7 @@ public:
 	ENetEvent event{};
 	ENetPeer* peer;
 	int entityId = 0;
+	ENetPacket* lastPacket = nullptr;
 
 	NetworkClient()
 	{
@@ -76,7 +77,11 @@ public:
 
 				if (event.channelID == 2)
 				{
+					if (lastPacket != nullptr)
+						enet_packet_destroy(lastPacket);
+
 					currentState = (GameState*)event.packet->data;
+					lastPacket = event.packet;
 				}
 
 				break;
@@ -87,13 +92,14 @@ public:
 		}
 	}
 
-	void SendInput(InputFrame inputFrame)
+	void SendInput(InputFrame frameTosend)
 	{
-		if (inputFrame.inputDirection.x == 0 && inputFrame.inputDirection.y == 0)
+		if (frameTosend.inputDirection.x == 0 && frameTosend.inputDirection.y == 0)
 			return;
-
+		inputFrame[0] = frameTosend;
+		
 		Message message;
-		message.frame = inputFrame;
+		message.frame = frameTosend;
 		message.entityId = entityId;
 		auto pack = enet_packet_create(&message, sizeof(Message), ENET_PACKET_FLAG_RELIABLE);
 		enet_peer_send(peer, 1, pack);

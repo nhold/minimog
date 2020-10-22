@@ -61,6 +61,7 @@ public:
 			case ENET_EVENT_TYPE_RECEIVE:
 				if (event.channelID == 1)
 				{
+					//puts("Received Input");
 					Message* mess = (Message*)event.packet->data;
 					ProcessMessage(*mess);
 				}
@@ -77,7 +78,7 @@ public:
 
 	void SendGameState()
 	{
-		ENetPacket* pack = enet_packet_create(currentState, sizeof(GameState), ENET_PACKET_FLAG_RELIABLE);
+		ENetPacket* pack = enet_packet_create(currentState, sizeof(GameState), ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT);
 		enet_host_broadcast(server, 2, pack);
 		currentState->frame++;
 	}
