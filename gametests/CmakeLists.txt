@@ -1,0 +1,19 @@
+# MiniMO - Tests.
+
+file(GLOB includefiles
+"include/*.hpp"
+)
+
+file(GLOB sourcefiles
+"source/*.cpp"
+)
+
+add_executable(gametests
+        ${includefiles}
+        ${sourcefiles})
+
+        
+target_link_libraries(gametests game)
+
+target_include_directories(gametests PUBLIC "include/")
+include_directories("include/")

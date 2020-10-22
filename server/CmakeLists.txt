@@ -12,18 +12,20 @@ file(GLOB sourcefiles
 add_executable(server
         ${includefiles}
         ${sourcefiles}
-)
+ "include/networkserver.hpp")
 
 target_link_libraries(server game)
-target_link_libraries(server debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/enet.lib")
-target_link_libraries(server optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/enet.lib")
+target_link_libraries(server debug "${CMAKE_SOURCE_DIR}/thirdparty/enet/enet64.lib")
+target_link_libraries(server optimized "${CMAKE_SOURCE_DIR}/thirdparty/enet/enet64.lib")
 
 if(WIN32)
   target_link_libraries(server wsock32 ws2_32 winmm)
 endif()
 
-include_directories("${CMAKE_SOURCE_DIR}/thirdparty/include/"
-"${CMAKE_SOURCE_DIR}/shared/include/"
+include_directories("${CMAKE_SOURCE_DIR}/thirdparty/enet/"
+                    "${CMAKE_SOURCE_DIR}/thirdparty/json/"
+                    "${CMAKE_SOURCE_DIR}/thirdparty/meta/"
+                    "${CMAKE_SOURCE_DIR}/shared/include/"
                     "include/")
                     
 

@@ -1,50 +1,63 @@
 #include <game.hpp>
+#include <stdio.h>
 
-Entity entities[MAX_ENTITY_COUNT];
-InputFrame inputFrame[MAX_ENTITY_COUNT];
+GameState* currentState = new GameState();
+
+InputFrame* inputFrame = new InputFrame[MAX_ENTITY_COUNT];
 
 void ProcessMessage(Message message)
 {
 	inputFrame[message.entityId] = message.frame;
 }
 
-void Tick(int min, int max)
+void Simulate(int min, int max)
 {
 	for (int i = 0; i < max; i++)
 	{
-		// If no input or entity is not alive we skip.
-		if (inputFrame[i].direction == 0)
+		// If no input / entity is not alive we skip.
+		if (inputFrame[i].inputDirection.x == 0 && inputFrame[i].inputDirection.y == 0)
 			continue;
 
 		ProcessInput(i);
 	}
+
+	currentState->frame++;
 }
 
 void ProcessInput(int i)
 {
-	if (inputFrame[i].type == InputType::MOVE)
+	Entity* currentEntity = &currentState->entities[i];
+	InputFrame* currentFrame = &inputFrame[i];
+
+	if (currentFrame->type == InputType::MOVE)
 	{
-		if (inputFrame[i].direction == 1)
+		Vector2 finalPosition = currentEntity->position + (currentFrame->inputDirection * currentEntity->speed);
+		currentEntity->position = finalPosition;
+
+		if (currentFrame->inputDirection.y < 0)
 		{
-			entities[i].x -= 1;
+			currentEntity->animationState = AnimationState::WALKDOWN;
 		}
 
-		if (inputFrame[i].direction == 2)
+		if (currentFrame->inputDirection.y > 0)
 		{
-			entities[i].x += 1;
+			currentEntity->animationState = AnimationState::WALKUP;
 		}
 
-		if (inputFrame[i].direction == 3)
+		if (currentFrame->inputDirection.x < 0)
 		{
-			entities[i].y -= 1;
+			currentEntity->animationState = AnimationState::WALKLEFT;
 		}
 
-		if (inputFrame[i].direction == 4)
+		if (currentFrame->inputDirection.x > 0)
 		{
-			entities[i].y += 1;
+			currentEntity->animationState = AnimationState::WALKRIGHT;
 		}
 	}
+	else
+	{
+		currentEntity->animationState = AnimationState::IDLELEFT;
+	}
 
-	// Clear input.
-	inputFrame[i].direction = 0;
+	inputFrame[i].inputDirection = Vector2(0,0);
 }

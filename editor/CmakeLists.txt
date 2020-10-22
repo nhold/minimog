@@ -16,28 +16,18 @@ add_executable(editor
 )
 
 find_package(OpenGL REQUIRED)
+find_package(SFML COMPONENTS main window graphics network system audio)
 
-include_directories("${CMAKE_SOURCE_DIR}/thirdparty/include/"
-                "${CMAKE_SOURCE_DIR}/shared/include/"
+target_include_directories(editor PUBLIC
                 "${CMAKE_SOURCE_DIR}/thirdparty/imgui/"
-                "include/")
+                "${CMAKE_SOURCE_DIR}/thirdparty/json/"
+                "${CMAKE_SOURCE_DIR}/thirdparty/pfd/"
+                "${CMAKE_SOURCE_DIR}/thirdparty/include/"
+                "${CMAKE_SOURCE_DIR}/shared/include/"
+                "include/"
+                "${OPENGL_INCLUDE_DIR}")
 
-target_link_libraries(editor  
-debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-main-d.lib"
-debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-window-d.lib"
-debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-system-d.lib"
-debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-graphics-d.lib"
-debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-audio-d.lib"
-debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-network-d.lib"
-${OPENGL_LIBRARIES})
-
-target_link_libraries(editor 
-optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-main.lib"
-optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-window.lib"
-optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-system.lib"
-optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-graphics.lib"
-optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-audio.lib"
-optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-network.lib")
+target_link_libraries(editor sfml-graphics sfml-audio sfml-network ${OPENGL_LIBRARIES})
 
 
 set (assetDir "${CMAKE_SOURCE_DIR}/assets")

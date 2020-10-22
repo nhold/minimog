@@ -10,36 +10,31 @@ file(GLOB sourcefiles
 
 add_executable(client
         ${includefiles}
-        ${sourcefiles}
-)
+        ${sourcefiles} "include/tilemap.hpp" "source/tilemap.cpp")
 
-target_link_libraries(client debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/enet.lib")
-target_link_libraries(client optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/enet.lib")
+find_package(OpenGL REQUIRED)
+find_package(SFML COMPONENTS main window graphics network system audio)
+
+target_link_libraries(client game)
 
 if(WIN32)
   target_link_libraries(client wsock32 ws2_32 winmm)
 endif()
 
-target_link_libraries(client  
-debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-main-d.lib"
-debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-window-d.lib"
-debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-system-d.lib"
-debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-graphics-d.lib"
-debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-audio-d.lib"
-debug "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-network-d.lib"
+target_link_libraries(client sfml-graphics sfml-audio sfml-network
 ${OPENGL_LIBRARIES})
 
-target_link_libraries(client 
-optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-main.lib"
-optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-window.lib"
-optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-system.lib"
-optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-graphics.lib"
-optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-audio.lib"
-optimized "${CMAKE_SOURCE_DIR}/thirdparty/lib/32/sfml-network.lib")
+target_link_libraries(client debug "${CMAKE_SOURCE_DIR}/thirdparty/enet/enet64.lib")
+target_link_libraries(client optimized "${CMAKE_SOURCE_DIR}/thirdparty/enet/enet64.lib")
 
-include_directories("${CMAKE_SOURCE_DIR}/thirdparty/include/"
-"${CMAKE_SOURCE_DIR}/shared/include/"
-                    "include/")
+target_include_directories(client PUBLIC
+    "${CMAKE_SOURCE_DIR}/thirdparty/imgui/"
+    "${CMAKE_SOURCE_DIR}/thirdparty/json/"
+    "${CMAKE_SOURCE_DIR}/thirdparty/pfd/"
+    "${CMAKE_SOURCE_DIR}/thirdparty/enet/"
+    "${CMAKE_SOURCE_DIR}/shared/include/"
+    "include/"
+    "${OPENGL_INCLUDE_DIR}")
 
 set (assetDir "${CMAKE_SOURCE_DIR}/assets")
 set (assetDestination "${CMAKE_CURRENT_BINARY_DIR}")

@@ -5,6 +5,7 @@
 #include <string>
 #include <tilemapdata.hpp>
 #include <tilesetdata.hpp>
+#include <Meta.h>
 
 struct ObjectPlacementData
 {
@@ -12,6 +13,18 @@ struct ObjectPlacementData
     float x;
     float y;
 };
+
+namespace meta
+{
+	template<>
+	inline auto registerMembers<ObjectPlacementData>()
+	{
+		return members(
+		member("id", &ObjectPlacementData::id),
+		member("x", &ObjectPlacementData::x),
+		member("y", &ObjectPlacementData::y));
+	}
+}
 
 struct RegionData
 {

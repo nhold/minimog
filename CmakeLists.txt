@@ -6,9 +6,16 @@ if(MSVC)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
 endif(MSVC)
 
+# SFML Setup.
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/sfml/lib/cmake)
+set(SFML_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/sfml/lib/cmake/SFML")
+set(SFML_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/sfml" CACHE BOOL "" FORCE)
+set(SFML_STATIC_LIBRARIES TRUE)
+
 project(minimmo)
 
 add_subdirectory(client)
 add_subdirectory(game)
+add_subdirectory(gametests)
 add_subdirectory(server)
 add_subdirectory(editor)

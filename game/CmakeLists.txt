@@ -11,6 +11,6 @@ file(GLOB sourcefiles
 add_library(game
         ${includefiles}
         ${sourcefiles}
-)
+ "include/vector2.hpp")
 target_include_directories(game PUBLIC "include/")
 include_directories("include/")
