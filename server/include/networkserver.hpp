@@ -52,7 +52,7 @@ public:
 			case ENET_EVENT_TYPE_CONNECT:
 				printf("Giving id: %i\n", playerIndices[currentPlayerCount]);
 				currentState->entities[playerIndices[currentPlayerCount]].type = 0;
-				currentState->entities[playerIndices[currentPlayerCount]].speed = 5.f;
+				
 				pack = enet_packet_create(&playerIndices[currentPlayerCount], sizeof(uint16_t), ENET_PACKET_FLAG_RELIABLE);
 				enet_peer_send(event.peer, 0, pack);
 				currentPlayerCount++;
@@ -61,7 +61,6 @@ public:
 			case ENET_EVENT_TYPE_RECEIVE:
 				if (event.channelID == 1)
 				{
-					//puts("Received Input");
 					Message* mess = (Message*)event.packet->data;
 					ProcessMessage(*mess);
 				}

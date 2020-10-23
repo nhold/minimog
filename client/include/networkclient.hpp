@@ -58,7 +58,7 @@ public:
 		}
 	}
 
-	void Loop()
+	void Listen()
 	{
 		while (enet_host_service(client, &event, 0) > 0)
 		{
@@ -94,10 +94,12 @@ public:
 
 	void SendInput(InputFrame frameTosend)
 	{
-		if (frameTosend.inputDirection.x == 0 && frameTosend.inputDirection.y == 0)
+		if (frameTosend.inputDirection.x == 0 && frameTosend.inputDirection.y == 0 && frameTosend.type == InputType::NONE)
+		{
 			return;
+		}
+
 		inputFrame[0] = frameTosend;
-		
 		Message message;
 		message.frame = frameTosend;
 		message.entityId = entityId;

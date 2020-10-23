@@ -10,13 +10,16 @@ int main()
 
 	using clock = std::chrono::steady_clock;
 	using tickRate = std::chrono::duration<clock::rep, std::ratio<1, 60>>;
-	using networkUpdateRate = std::chrono::duration<clock::rep, std::ratio<10, 60>>;
+	using networkUpdateRate = std::chrono::duration<clock::rep, std::ratio<1, 60>>;
 
 	auto nextTick = clock::now() + tickRate{ 1 };
 	auto nextNetworkUpdate = clock::now() + networkUpdateRate{ 1 };
 
 	EpicZStage1 stage;
 	stage.Initialise();
+
+	entityDefinitions[0].speed = 2;
+
 	while (networkServer.isRunning)
 	{
 		networkServer.ReceiveInputs();
