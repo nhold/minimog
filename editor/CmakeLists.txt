@@ -22,7 +22,7 @@ target_include_directories(editor PUBLIC
                 "${CMAKE_SOURCE_DIR}/thirdparty/imgui/"
                 "${CMAKE_SOURCE_DIR}/thirdparty/json/"
                 "${CMAKE_SOURCE_DIR}/thirdparty/pfd/"
-                "${CMAKE_SOURCE_DIR}/thirdparty/include/"
+                "${CMAKE_SOURCE_DIR}/thirdparty/meta/"
                 "${CMAKE_SOURCE_DIR}/shared/include/"
                 "include/"
                 "${OPENGL_INCLUDE_DIR}")

@@ -1,42 +1,44 @@
-# MiniMO
+# minimog - client executable.
 
-file(GLOB includefiles
-"include/*.hpp"
-)
+file(GLOB includefiles "include/*.hpp")
+file(GLOB sourcefiles "source/*.cpp")
 
-file(GLOB sourcefiles
-"source/*.cpp"
-)
+add_executable(client ${includefiles} ${sourcefiles})
 
-add_executable(client
-        ${includefiles}
-        ${sourcefiles} "include/tilemap.hpp" "source/tilemap.cpp")
-
+# We require OpenGL and SFML.
 find_package(OpenGL REQUIRED)
 find_package(SFML COMPONENTS main window graphics network system audio)
 
+#Link to out internal libraries.
 target_link_libraries(client game)
+target_link_libraries(client sfmlp)
 
+#For enet, we need the socket libs.
 if(WIN32)
   target_link_libraries(client wsock32 ws2_32 winmm)
 endif()
 
-target_link_libraries(client sfml-graphics sfml-audio sfml-network
-${OPENGL_LIBRARIES})
+#SFML linking
+target_link_libraries(client sfml-graphics sfml-audio sfml-network ${OPENGL_LIBRARIES})
 
+#enet linking
 target_link_libraries(client debug "${CMAKE_SOURCE_DIR}/thirdparty/enet/enet64.lib")
 target_link_libraries(client optimized "${CMAKE_SOURCE_DIR}/thirdparty/enet/enet64.lib")
 
-target_include_directories(client PUBLIC
-    "${CMAKE_SOURCE_DIR}/thirdparty/imgui/"
-    "${CMAKE_SOURCE_DIR}/thirdparty/json/"
-    "${CMAKE_SOURCE_DIR}/thirdparty/pfd/"
-    "${CMAKE_SOURCE_DIR}/thirdparty/enet/"
-    "${CMAKE_SOURCE_DIR}/shared/include/"
-    "include/"
-    "${OPENGL_INCLUDE_DIR}")
+#third party headers.
+target_include_directories(client 
+    PRIVATE "${CMAKE_SOURCE_DIR}/thirdparty/imgui/"
+    PRIVATE "${CMAKE_SOURCE_DIR}/thirdparty/json/"
+    PRIVATE "${CMAKE_SOURCE_DIR}/thirdparty/meta/"
+    PRIVATE "${CMAKE_SOURCE_DIR}/thirdparty/pfd/"
+    PRIVATE "${CMAKE_SOURCE_DIR}/thirdparty/enet/"
+    PRIVATE "include/"
+    PRIVATE "${OPENGL_INCLUDE_DIR}")
 
+#C++20
+set_property(TARGET client PROPERTY CXX_STANDARD 20)
+
+#Copy the asset dir.
 set (assetDir "${CMAKE_SOURCE_DIR}/assets")
 set (assetDestination "${CMAKE_CURRENT_BINARY_DIR}")
-
 file(COPY "${assetDir}" DESTINATION "${assetDestination}")

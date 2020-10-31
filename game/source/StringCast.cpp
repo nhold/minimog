@@ -1,13 +1,4 @@
-// In JSON map keys can only be strings, so here's a class which makes conversion to/from string easy
-#pragma once
-
-#include <string>
-
-template <typename T>
-std::string castToString(const T& value);
-
-// template specializations
-
+#include "StringCast.h"
 
 std::string castToString(const bool& value)
 {
@@ -58,17 +49,4 @@ template <>
 std::string fromString(const std::string& valueStr)
 {
     return valueStr;
-}
-
-// return empty string if no conversion possible
-template <typename T>
-std::string castToString(const T& /* value */)
-{
-    return std::string();
-}
-
-template <typename T>
-T fromString(const std::string& /* value */)
-{
-    return T();
 }

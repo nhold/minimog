@@ -5,8 +5,8 @@
 class Vector2
 {
 public:
-	float x;
-	float y;
+	float x = 0;
+	float y = 0;
 
 	Vector2()
 	{
@@ -67,5 +67,20 @@ public:
 
 		angle = acos(angle);
 		return angle;
+	}
+
+	static float Lerp(float a, float b, float lerp)
+	{
+		return a * (1 - lerp) + b * lerp;
+	}
+
+	static Vector2 Lerp(const Vector2& a, const Vector2& b, float l)
+	{
+		Vector2 r;
+
+		r.x = Lerp(a.x, b.x, l);
+		r.y = Lerp(a.y, b.y, l);
+
+		return r;
 	}
 };

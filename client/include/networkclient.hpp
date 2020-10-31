@@ -3,6 +3,14 @@
 #include <enet/enet.h>
 #include <game.hpp>
 #include <stdio.h>
+#include <input.hpp>
+#include <algorithm>
+
+struct OldData
+{
+	Entity processedState;
+	InputFrame input;
+};
 
 class NetworkClient
 {
@@ -10,8 +18,15 @@ public:
 	ENetHost* client{};
 	ENetEvent event{};
 	ENetPeer* peer;
-	int entityId = 0;
+	JoinedMessage joinedMessage{};
 	ENetPacket* lastPacket = nullptr;
+	uint32_t lastProcessedInput = 0;
+	int sequence = 0;
+	std::vector<UpdateGameMessage> serverUpdates{};
+	std::vector<InputFrame> inputs;
+	std::vector<OldData> oldData;
+
+	Entity player;
 
 	NetworkClient()
 	{
@@ -31,7 +46,6 @@ public:
 
 		ENetAddress address;
 	
-
 		enet_address_set_host(&address, "127.0.0.1");
 		address.port = 9999;
 
@@ -71,17 +85,18 @@ public:
 				// This is the index we control.
 				if (event.channelID == 0)
 				{
-					entityId = *event.packet->data;
+					joinedMessage = *(JoinedMessage*)event.packet->data;
+					Game::Global().currentState->entities[joinedMessage.controlledId] = joinedMessage.snappedEnt;
 					enet_packet_destroy(event.packet);
 				}
 
 				if (event.channelID == 2)
 				{
-					if (lastPacket != nullptr)
-						enet_packet_destroy(lastPacket);
-
-					currentState = (GameState*)event.packet->data;
-					lastPacket = event.packet;
+					UpdateGameMessage* message = (UpdateGameMessage*)event.packet->data;
+					serverUpdates.push_back(*message);
+					memcpy(Game::Global().currentState, &message->state, sizeof(GameState));
+					enet_packet_destroy(event.packet);
+					Reconcile();
 				}
 
 				break;
@@ -92,18 +107,125 @@ public:
 		}
 	}
 
-	void SendInput(InputFrame frameTosend)
+	void Reconcile()
 	{
-		if (frameTosend.inputDirection.x == 0 && frameTosend.inputDirection.y == 0 && frameTosend.type == InputType::NONE)
+		auto latestUpdate = serverUpdates.back();
+		auto latestUpdateEntity = latestUpdate.state.entities[joinedMessage.controlledId];
+
+		auto found = std::find_if(oldData.begin(), oldData.end(), [&](const OldData& s)
+			{
+				return s.input.sequence == latestUpdate.lastProcessedInput;
+			});
+
+		if (found != oldData.end())
 		{
-			return;
+			auto b = *found;
+			auto delta = b.processedState.position - latestUpdateEntity.position;
+			if (delta.SqrMagnitude() == 0)
+			{
+				printf("Approved Input Sequence: %i\n", b.input.sequence);
+				auto seq = b.input.sequence;
+
+				// Clear old data, we are approved.
+				std::remove_if(oldData.begin(), oldData.end(), [&](OldData d) 
+					{
+						return d.input.sequence < seq;
+					});
+
+				std::remove_if(inputs.begin(), inputs.end(), [&](InputFrame d)
+					{
+						return d.sequence < seq;
+					});
+
+				serverUpdates.pop_back();
+			}
+			else
+			{
+				printf("Rejected Input Sequence: %i\n EXP X,Y: %f,%f TRUE X,Y: %f,%f delta: %f\n\n", 
+					b.input.sequence, 
+					b.processedState.position.x, 
+					b.processedState.position.y, 
+					latestUpdate.state.entities[joinedMessage.controlledId].position.x, 
+					latestUpdate.state.entities[joinedMessage.controlledId].position.y,
+					delta.SqrMagnitude());
+			}
+		}
+		else
+		{
 		}
 
-		inputFrame[0] = frameTosend;
-		Message message;
+	}
+
+	void CaptureInput(Input input)
+	{
+		InputFrame playerFrame;
+		playerFrame.type = InputType::NONE;
+		playerFrame.inputDirection = Vector2(0, 0);
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+		{
+			playerFrame.inputDirection.x -= 1;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+		{
+			playerFrame.inputDirection.x += 1;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+		{
+			playerFrame.inputDirection.y -= 1;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		{
+			playerFrame.inputDirection.y += 1;
+		}
+
+		if (input.justReleased[sf::Keyboard::E])
+		{
+			playerFrame.type = InputType::PERFORMACTION;
+		}
+
+		if (playerFrame.inputDirection.x != 0 && playerFrame.inputDirection.y != 0)
+		{
+			playerFrame.inputDirection = playerFrame.inputDirection.Normalise();
+		}
+
+		playerFrame.sequence = sequence;
+		sequence++;
+
+		if (!playerFrame.IsEmpty())
+		{
+			inputs.push_back(playerFrame);
+			SendInput(playerFrame);
+		}
+	}
+
+	void ProcessInputs()
+	{
+		for each (auto var in inputs)
+		{
+			if (var.sequence > lastProcessedInput)
+			{
+				OldData data;
+				data.input = var;
+				data.processedState = player;
+				
+				Game::Global().Movement(&var, &player, &Game::Global().entityDefinitions[0]);
+				lastProcessedInput = var.sequence;
+				oldData.push_back(data);
+				printf("Processed Input Seq: %i. X:%f Y:%f\n", lastProcessedInput, player.position.x, player.position.y);
+			}
+		}
+	}
+
+	void SendInput(InputFrame frameTosend)
+	{
+		InputMessage message;
 		message.frame = frameTosend;
-		message.entityId = entityId;
-		auto pack = enet_packet_create(&message, sizeof(Message), ENET_PACKET_FLAG_RELIABLE);
+		message.entityId = joinedMessage.controlledId;
+		auto pack = enet_packet_create(&message, sizeof(InputMessage), ENET_PACKET_FLAG_RELIABLE);
 		enet_peer_send(peer, 1, pack);
 	}
 
@@ -113,9 +235,14 @@ public:
 		enet_deinitialize();
 	}
 
-	Entity* GetControlledEntity()
+	Entity* GetLatestServerEntity()
 	{
-		return &currentState->entities[entityId];
+		return &Game::Global().currentState->entities[joinedMessage.controlledId];
+	}
+
+	Entity* GetLocalEntity()
+	{
+		return &player;
 	}
 
 };

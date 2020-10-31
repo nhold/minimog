@@ -11,6 +11,12 @@ file(GLOB sourcefiles
 add_library(game
         ${includefiles}
         ${sourcefiles}
- "include/vector2.hpp")
-target_include_directories(game PUBLIC "include/")
+ "include/vector2.hpp" "include/enums.hpp" "include/math.hpp" "include/structs.hpp" "include/ztentaclecontroller.hpp" "include/file.hpp")
+
+target_include_directories(game PUBLIC "include/"
+    "${CMAKE_SOURCE_DIR}/thirdparty/json/"
+    "${CMAKE_SOURCE_DIR}/thirdparty/meta/")
+
+ set_property(TARGET game PROPERTY CXX_STANDARD 20)
+
 include_directories("include/")

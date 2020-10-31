@@ -2,141 +2,164 @@
 
 #include <stdint.h>
 #include <math.h>
+#include <math.hpp>
 #include <stdio.h>
 #include <vector2.hpp>
 #include <map>
+#include <enums.hpp>
+#include <structs.hpp>
+#include <limits>
 
-constexpr uint16_t MAX_ENTITY_COUNT = 1000;
-extern uint64_t currentFrame;
 
-constexpr float PI = 3.14f;
-constexpr float Deg2Rad = PI / 180.0f;
-
-enum class AnimationState : uint8_t
-{
-	IDLERIGHT,
-	IDLELEFT,
-	IDLEDOWN,
-	IDLEUP,
-	WALKLEFT,
-	WALKRIGHT,
-	WALKUP,
-	WALKDOWN
-};
-
-struct Entity
-{
-	uint32_t type = 3;
-	Vector2 position = Vector2(0,0);
-	Vector2 direction;
-	uint32_t health = 100;
-	AnimationState animationState = AnimationState::IDLEDOWN;
-};
-
-struct Rect
+class Game
 {
 public:
-	Vector2 position;
-	Vector2 size;
-};
-
-struct EntityData
-{
-	Rect collision;
-	float interactionRadius = 20;
-	Vector2 originPoint = Vector2(0.5f, 0.5f);
-	uint32_t maxHealth = 100;
-	uint8_t currentFrame = 0;
-	float speed = 1.f;
-};
-
-enum InputType : uint8_t
-{
-	NONE,
-	PERFORMACTION,
-	ATTACK
-};
-
-struct InputFrame
-{
-	Vector2 inputDirection = Vector2(0,0);
-	InputType type = InputType::NONE;
-};
-
-struct Message
-{
-	InputFrame frame;
-	uint16_t entityId;
-	uint64_t frameNumber;
-};
-
-inline InputFrame CreateInputFrame(InputType inputType)
-{
-	InputFrame inputFrame;
-	inputFrame.inputDirection = Vector2(0, 0);
-	inputFrame.type = inputType;
-
-	return inputFrame;
-}
-
-struct GameState
-{
-	Entity entities[MAX_ENTITY_COUNT];
-	uint64_t frame = 0;
-};
-
-extern EntityData entityDefinitions[MAX_ENTITY_COUNT];
-extern GameState* gameStates;
-extern GameState* currentState;
-extern InputFrame* inputFrame;
-
-void ProcessMessage(Message message);
-void Simulate(int min, int max);
-void ProcessInput(int i);
-int GetInteractableEntity(int entity);
-bool IsEntityInFront(Entity* initial, Entity* other, float arc);
-
-class EpicZStage1
-{
-public:
-	float timer = 1;
-
-	int currentProjectile = 102;
-	Vector2 projectilDir;
-
-	void Initialise()
+	static Game& Global() 
 	{
-		currentState->entities[101].health = 1000;
-		entityDefinitions[101].maxHealth = 1000;
-		currentState->entities[101].position = Vector2(100, 150);
-		currentState->entities[101].type = 99;
+		static Game game; return game;
 	}
 
-	void Process()
+	GameState* currentState = new GameState();
+	EntityData* entityDefinitions = new EntityData[MAX_ENTITY_COUNT];
+	InputFrame* inputFrames = new InputFrame[MAX_ENTITY_COUNT];
+
+	Game()
 	{
-		timer -= 1;
-		
-		if (timer <= 0)
+	}
+
+	GameState* Simulate(GameState* gameState, InputFrame* inputFrames)
+	{
+		GameState* processedState = new GameState();
+		memcpy(processedState, gameState, sizeof(GameState));
+
+		for (int i = 0; i < MAX_ENTITY_COUNT; i++ )
 		{
-			timer = 500;
-			ShootProjectile();
+			InputFrame* input = &inputFrames[i];
+			Entity* entity = &processedState->entities[i];
+			EntityData* entityData = &entityDefinitions[entity->type];
+			Movement(input, entity, entityData);
+			Use(processedState, input, i);
+			input->inputDirection = Vector2(0, 0);
+			input->type = InputType::NONE;
 		}
 
-		auto currentEntity = &currentState->entities[currentProjectile];
-		auto currentInputFrame = &inputFrame[currentProjectile];
-
-		currentInputFrame->inputDirection = projectilDir;
+		return processedState;
 	}
 
-	void ShootProjectile()
+	int GetValidInteractableEntityId(GameState* state, int entityId)
 	{
-		Entity* currentEntity = &currentState->entities[currentProjectile];
-		currentEntity->position = Vector2(130, 150);
-		currentEntity->type = 98;
-		entityDefinitions[98].speed = 3.5f;
+		Entity* currentEntity = &state->entities[entityId];
+		int interactableEntity = -1;
 
-		Entity* closestPlayer = &currentState->entities[0];
-		projectilDir = closestPlayer->position - currentEntity->position;
-		projectilDir = projectilDir.Normalise();
+		float closestDistance = std::numeric_limits<float>::max();
+
+		for (int i = 0; i < MAX_ENTITY_COUNT; i++)
+		{
+			if (i == entityId) // We can't interact ourselves.
+			{
+				continue;
+			}
+
+			Entity* checkEntity = &currentState->entities[i];
+			auto direction = (checkEntity->position - currentEntity->position);
+			auto distance = direction.SqrMagnitude();
+
+			if (distance < closestDistance)
+			{
+				if (IsEntityInFront(currentEntity, checkEntity, 35 * Deg2Rad))
+				{
+					closestDistance = distance;
+					interactableEntity = i;
+				}
+			}
+		}
+
+		if (interactableEntity > -1)
+		{
+			EntityData* ent = &entityDefinitions[interactableEntity];
+			if (closestDistance > ent->interactionRadius * ent->interactionRadius)
+			{
+				interactableEntity = -1;
+			}
+		}
+
+
+		return interactableEntity;
+	}
+
+	static GameState* Interpolate(GameState* current, GameState* previous, float interp)
+	{
+		GameState* state = new GameState();
+
+		for (int i = 0; i < MAX_ENTITY_COUNT; i++)
+		{
+			state->entities[i].position = Vector2::Lerp(current->entities[i].position, current->entities[i].position, interp);
+			state->entities[i].direction = Vector2::Lerp(current->entities[i].direction, current->entities[i].direction, interp);
+		}
+
+		return state;
+	}
+
+	bool IsEntityInFront(Entity* initial, Entity* other, float arc)
+	{
+		auto vector = other->position - initial->position;
+		float angle = vector.AngleBetween(initial->direction);
+
+		return angle <= arc * 0.5f;
+	}
+
+	void Movement(InputFrame* input, Entity* entity, EntityData* data)
+	{
+		if (input->inputDirection.SqrMagnitude() != 0)
+		{
+			entity->direction = input->inputDirection;
+
+			Vector2 finalPosition = entity->position + (input->inputDirection * data->speed);
+			entity->position = finalPosition;
+
+			if (input->inputDirection.y < 0)
+			{
+				entity->animationState = AnimationState::WALKDOWN;
+			}
+
+			if (input->inputDirection.y > 0)
+			{
+				entity->animationState = AnimationState::WALKUP;
+			}
+
+			if (input->inputDirection.x < 0)
+			{
+				entity->animationState = AnimationState::WALKLEFT;
+			}
+
+			if (input->inputDirection.x > 0)
+			{
+				entity->animationState = AnimationState::WALKRIGHT;
+			}
+		}
+		else
+		{
+			entity->animationState = AnimationState::IDLELEFT;
+		}
+	}
+
+	void Use(GameState* state, InputFrame* input, int entityId)
+	{
+		if (input->type == InputType::PERFORMACTION)
+		{
+			int entity = GetValidInteractableEntityId(state, entityId);
+			printf("Entity interacted with: %i\n", entity);
+			if (entity != -1)
+			{
+				if (state->entities[entity].type == 99)
+				{
+					state->entities[entity].type = 0;
+				}
+				else if (state->entities[entity].type == 0)
+				{
+					state->entities[entity].type = 99;
+				}
+			}
+		}
 	}
 };

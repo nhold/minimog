@@ -2,6 +2,7 @@
 #include <chrono>
 #include <thread>
 #include <networkserver.hpp>
+#include <ztentaclecontroller.hpp>
 
 int main()
 {
@@ -10,34 +11,30 @@ int main()
 
 	using clock = std::chrono::steady_clock;
 	using tickRate = std::chrono::duration<clock::rep, std::ratio<1, 60>>;
-	using networkUpdateRate = std::chrono::duration<clock::rep, std::ratio<1, 60>>;
+	using networkUpdateRate = std::chrono::duration<clock::rep, std::ratio<10, 60>>;
 
 	auto nextTick = clock::now() + tickRate{ 1 };
 	auto nextNetworkUpdate = clock::now() + networkUpdateRate{ 1 };
 
-	EpicZStage1 stage;
-	stage.Initialise();
-
-	entityDefinitions[0].speed = 2;
+	// HACK: Enforce player speed
+	Game::Global().entityDefinitions[0].speed = 2;
 
 	while (networkServer.isRunning)
 	{
-		networkServer.ReceiveInputs();
+		networkServer.Listen();
 
 		auto now = clock::now();
-
 		if (now >= nextTick)
 		{
-			auto diff = nextTick - now;
-			stage.Process();
-			Simulate(0, MAX_ENTITY_COUNT);
+			auto diff = now - nextTick;
+			networkServer.ProcessInput();
 			nextTick += tickRate{ 1 } + diff;
 		}
 
 		now = clock::now();
 		if (now >= nextNetworkUpdate)
 		{
-			auto diff = nextTick - now;
+			auto diff = now - nextTick;
 			networkServer.SendGameState();
 			nextNetworkUpdate += networkUpdateRate{ 1 } + diff;
 		}

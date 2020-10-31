@@ -1,0 +1,214 @@
+{
+    "entities": [
+        {
+            "collision": {
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "size": {
+                    "x": 0.0,
+                    "y": 0.0
+                }
+            },
+            "health": 10000,
+            "interactionRadius": 20.0,
+            "name": "Z Tentacle",
+            "originPoint": {
+                "x": 0.5,
+                "y": 0.5
+            },
+            "speed": 0.0,
+            "texture": "assets/enemy1.png"
+        },
+        {
+            "collision": {
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "size": {
+                    "x": 0.0,
+                    "y": 0.0
+                }
+            },
+            "health": 100,
+            "interactionRadius": 20.0,
+            "name": "Z Spine",
+            "originPoint": {
+                "x": 0.5,
+                "y": 0.5
+            },
+            "speed": 1.0,
+            "texture": "assets/zspine.png"
+        },
+        {
+            "collision": {
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "size": {
+                    "x": 0.0,
+                    "y": 0.0
+                }
+            },
+            "health": 100,
+            "interactionRadius": 20.0,
+            "name": "Tentacle Trap",
+            "originPoint": {
+                "x": 0.5,
+                "y": 0.5
+            },
+            "speed": 1.0,
+            "texture": "assets/TentacleTrap.png"
+        },
+        {
+            "collision": {
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "size": {
+                    "x": 0.0,
+                    "y": 0.0
+                }
+            },
+            "health": 100,
+            "interactionRadius": 20.0,
+            "name": "Goblin",
+            "originPoint": {
+                "x": 0.5,
+                "y": 0.5
+            },
+            "speed": 1.0,
+            "texture": "assets/enemy1.png"
+        },
+        {
+            "collision": {
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "size": {
+                    "x": 0.0,
+                    "y": 0.0
+                }
+            },
+            "health": 100,
+            "interactionRadius": 20.0,
+            "name": "<Default Entity>",
+            "originPoint": {
+                "x": 0.5,
+                "y": 0.5
+            },
+            "speed": 1.0,
+            "texture": "assets/default.png"
+        },
+        {
+            "collision": {
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "size": {
+                    "x": 0.0,
+                    "y": 0.0
+                }
+            },
+            "health": 100,
+            "interactionRadius": 20.0,
+            "name": "<Default Entity>",
+            "originPoint": {
+                "x": 0.5,
+                "y": 0.5
+            },
+            "speed": 1.0,
+            "texture": "assets/default.png"
+        },
+        {
+            "collision": {
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "size": {
+                    "x": 0.0,
+                    "y": 0.0
+                }
+            },
+            "health": 100,
+            "interactionRadius": 20.0,
+            "name": "<Default Entity>",
+            "originPoint": {
+                "x": 0.5,
+                "y": 0.5
+            },
+            "speed": 1.0,
+            "texture": "assets/default.png"
+        },
+        {
+            "collision": {
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "size": {
+                    "x": 0.0,
+                    "y": 0.0
+                }
+            },
+            "health": 100,
+            "interactionRadius": 20.0,
+            "name": "<Default Entity>",
+            "originPoint": {
+                "x": 0.5,
+                "y": 0.5
+            },
+            "speed": 1.0,
+            "texture": "assets/default.png"
+        },
+        {
+            "collision": {
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "size": {
+                    "x": 0.0,
+                    "y": 0.0
+                }
+            },
+            "health": 100,
+            "interactionRadius": 20.0,
+            "name": "<Default Entity>",
+            "originPoint": {
+                "x": 0.5,
+                "y": 0.5
+            },
+            "speed": 1.0,
+            "texture": "assets/default.png"
+        },
+        {
+            "collision": {
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "size": {
+                    "x": 0.0,
+                    "y": 0.0
+                }
+            },
+            "health": 100,
+            "interactionRadius": 20.0,
+            "name": "<Default Entity>",
+            "originPoint": {
+                "x": 0.5,
+                "y": 0.5
+            },
+            "speed": 1.0,
+            "texture": "assets/default.png"
+        }
+    ]
+}

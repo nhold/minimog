@@ -1,13 +1,13 @@
-#include <tilemap.hpp>
-
-#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <fstream>
 
+#include <SFML/Graphics.hpp>
+#include <sfmlp/tilemap.hpp>
+
 TileMap::TileMap()
 {
-	mapWidth = 20;
-	mapHeight = 20;
+	mapWidth = tileMapSize;
+	mapHeight = tileMapSize;
 
 	tiles = new int[mapWidth * mapHeight];
 
@@ -34,7 +34,7 @@ size_t TileMap::index(int x, int y)
 	return x + mapWidth * y;
 }
 
-void TileMap::Render(sf::RenderWindow* window)
+void TileMap::Render(sf::RenderWindow& window)
 {
 	for (int x = 0; x < mapWidth; x++)
 	{
@@ -45,7 +45,7 @@ void TileMap::Render(sf::RenderWindow* window)
 
 			sf::Sprite* sprite = tileTypes[tiles[index(x, y)]];
 			sprite->setPosition(static_cast<float>(x * 32), static_cast<float>(y * 32));
-			window->draw(*sprite);
+			window.draw(*sprite);
 		}
 	}
 }
